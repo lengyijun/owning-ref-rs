@@ -244,6 +244,9 @@ fn main() {
 ```
 */
 
+#[cfg(not(feature = "no_std"))]
+extern crate core;
+
 extern crate stable_deref_trait;
 pub use stable_deref_trait::{StableDeref as StableAddress, CloneStableDeref as CloneStableAddress};
 
@@ -1257,6 +1260,7 @@ pub type ErasedBoxRefMut<U> = OwningRefMut<Box<dyn Erased>, U>;
 
 #[cfg(test)]
 mod tests {
+    #[cfg(not(feature = "no_std"))]
     mod owning_ref {
         use super::super::OwningRef;
         use super::super::{RcRef, BoxRef, Erased, ErasedBoxRef};
@@ -1267,24 +1271,29 @@ mod tests {
         use std::rc::Rc;
 
         #[derive(Debug, PartialEq)]
+        #[cfg(not(feature = "no_std"))]
         struct Example(u32, String, [u8; 3]);
+        #[cfg(not(feature = "no_std"))]
         fn example() -> Example {
             Example(42, "hello world".to_string(), [1, 2, 3])
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn new_deref() {
             let or: OwningRef<Box<()>, ()> = OwningRef::new(Box::new(()));
             assert_eq!(&*or, &());
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn into() {
             let or: OwningRef<Box<()>, ()> = Box::new(()).into();
             assert_eq!(&*or, &());
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_offset_ref() {
             let or: BoxRef<Example> = Box::new(example()).into();
             let or: BoxRef<_, u32> = or.map(|x| &x.0);
@@ -1296,6 +1305,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_heap_ref() {
             let or: BoxRef<Example> = Box::new(example()).into();
             let or: BoxRef<_, str> = or.map(|x| &x.1[..5]);
@@ -1303,6 +1313,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_static_ref() {
             let or: BoxRef<()> = Box::new(()).into();
             let or: BoxRef<_, str> = or.map(|_| "hello");
@@ -1310,6 +1321,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_chained() {
             let or: BoxRef<String> = Box::new(example().1).into();
             let or: BoxRef<_, str> = or.map(|x| &x[1..5]);
@@ -1318,6 +1330,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_chained_inference() {
             let or = BoxRef::new(Box::new(example().1))
                 .map(|x| &x[..5])
@@ -1326,6 +1339,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn as_owner() {
             let or: BoxRef<String> = Box::new(example().1).into();
             let or = or.map(|x| &x[..5]);
@@ -1334,6 +1348,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn into_owner() {
             let or: BoxRef<String> = Box::new(example().1).into();
             let or = or.map(|x| &x[..5]);
@@ -1343,6 +1358,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn fmt_debug() {
             let or: BoxRef<String> = Box::new(example().1).into();
             let or = or.map(|x| &x[..5]);
@@ -1351,6 +1367,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn erased_owner() {
             let o1: BoxRef<Example, str> = BoxRef::new(Box::new(example()))
                 .map(|x| &x.1[..]);
@@ -1363,6 +1380,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn non_static_erased_owner() {
             let foo = [413, 612];
             let bar = &foo;
@@ -1382,6 +1400,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn raii_locks() {
             use super::super::{RefRef, RefMutRef};
             use std::cell::RefCell;
@@ -1441,6 +1460,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn eq() {
             let or1: BoxRef<[u8]> = BoxRef::new(vec![1, 2, 3].into_boxed_slice());
             let or2: BoxRef<[u8]> = BoxRef::new(vec![1, 2, 3].into_boxed_slice());
@@ -1448,6 +1468,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn cmp() {
             let or1: BoxRef<[u8]> = BoxRef::new(vec![1, 2, 3].into_boxed_slice());
             let or2: BoxRef<[u8]> = BoxRef::new(vec![4, 5, 6].into_boxed_slice());
@@ -1455,6 +1476,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn partial_cmp() {
             let or1: BoxRef<[u8]> = BoxRef::new(vec![4, 5, 6].into_boxed_slice());
             let or2: BoxRef<[u8]> = BoxRef::new(vec![1, 2, 3].into_boxed_slice());
@@ -1462,6 +1484,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn hash() {
             let mut h1 = DefaultHasher::new();
             let mut h2 = DefaultHasher::new();
@@ -1476,6 +1499,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn borrow() {
             let mut hash = HashMap::new();
             let     key  = RcRef::<String>::new(Rc::new("foo-bar".to_string())).map(|s| &s[..]);
@@ -1488,6 +1512,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn total_erase() {
             let a: OwningRef<Vec<u8>, [u8]>
                 = OwningRef::new(vec![]).map(|x| &x[..]);
@@ -1505,6 +1530,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn total_erase_box() {
             let a: OwningRef<Vec<u8>, [u8]>
                 = OwningRef::new(vec![]).map(|x| &x[..]);
@@ -1519,6 +1545,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map1() {
             use std::any::Any;
 
@@ -1529,6 +1556,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map2() {
             use std::any::Any;
 
@@ -1539,6 +1567,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_with_owner() {
             let owning_ref: BoxRef<Example> = Box::new(example()).into();
             let owning_ref = owning_ref.map(|owner| &owner.1);
@@ -1550,6 +1579,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map_with_owner_ok() {
             let owning_ref: BoxRef<Example> = Box::new(example()).into();
             let owning_ref = owning_ref.map(|owner| &owner.1);
@@ -1561,6 +1591,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map_with_owner_err() {
             let owning_ref: BoxRef<Example> = Box::new(example()).into();
             let owning_ref = owning_ref.map(|owner| &owner.1);
@@ -1572,6 +1603,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(feature = "no_std"))]
     mod owning_handle {
         use super::super::OwningHandle;
         use super::super::RcRef;
@@ -1581,6 +1613,7 @@ mod tests {
         use std::sync::RwLock;
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn owning_handle() {
             use std::cell::RefCell;
             let cell = Rc::new(RefCell::new(2));
@@ -1592,6 +1625,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_owning_handle_ok() {
             use std::cell::RefCell;
             let cell = Rc::new(RefCell::new(2));
@@ -1607,6 +1641,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_owning_handle_err() {
             use std::cell::RefCell;
             let cell = Rc::new(RefCell::new(2));
@@ -1623,6 +1658,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn nested() {
             use std::cell::RefCell;
             use std::sync::{Arc, RwLock};
@@ -1640,6 +1676,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn owning_handle_safe() {
             use std::cell::RefCell;
             let cell = Rc::new(RefCell::new(2));
@@ -1649,6 +1686,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn owning_handle_mut_safe() {
             use std::cell::RefCell;
             let cell = Rc::new(RefCell::new(2));
@@ -1660,6 +1698,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn owning_handle_safe_2() {
             let result = {
                 let complex = Rc::new(RefCell::new(Arc::new(RwLock::new("someString"))));
@@ -1674,6 +1713,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(feature = "no_std"))]
     mod owning_ref_mut {
         use super::super::{OwningRefMut, BoxRefMut, Erased, ErasedBoxRefMut};
         use super::super::BoxRef;
@@ -1683,24 +1723,29 @@ mod tests {
         use std::collections::HashMap;
 
         #[derive(Debug, PartialEq)]
+        #[cfg(not(feature = "no_std"))]
         struct Example(u32, String, [u8; 3]);
+        #[cfg(not(feature = "no_std"))]
         fn example() -> Example {
             Example(42, "hello world".to_string(), [1, 2, 3])
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn new_deref() {
             let or: OwningRefMut<Box<()>, ()> = OwningRefMut::new(Box::new(()));
             assert_eq!(&*or, &());
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn new_deref_mut() {
             let mut or: OwningRefMut<Box<()>, ()> = OwningRefMut::new(Box::new(()));
             assert_eq!(&mut *or, &mut ());
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn mutate() {
             let mut or: OwningRefMut<Box<usize>, usize> = OwningRefMut::new(Box::new(0));
             assert_eq!(&*or, &0);
@@ -1709,12 +1754,14 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn into() {
             let or: OwningRefMut<Box<()>, ()> = Box::new(()).into();
             assert_eq!(&*or, &());
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_offset_ref() {
             let or: BoxRefMut<Example> = Box::new(example()).into();
             let or: BoxRef<_, u32> = or.map(|x| &mut x.0);
@@ -1726,6 +1773,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_heap_ref() {
             let or: BoxRefMut<Example> = Box::new(example()).into();
             let or: BoxRef<_, str> = or.map(|x| &mut x.1[..5]);
@@ -1733,6 +1781,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_static_ref() {
             let or: BoxRefMut<()> = Box::new(()).into();
             let or: BoxRef<_, str> = or.map(|_| "hello");
@@ -1740,6 +1789,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_mut_offset_ref() {
             let or: BoxRefMut<Example> = Box::new(example()).into();
             let or: BoxRefMut<_, u32> = or.map_mut(|x| &mut x.0);
@@ -1751,6 +1801,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_mut_heap_ref() {
             let or: BoxRefMut<Example> = Box::new(example()).into();
             let or: BoxRefMut<_, str> = or.map_mut(|x| &mut x.1[..5]);
@@ -1758,6 +1809,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_mut_static_ref() {
             static mut MUT_S: [u8; 5] = *b"hello";
 
@@ -1769,6 +1821,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_mut_chained() {
             let or: BoxRefMut<String> = Box::new(example().1).into();
             let or: BoxRefMut<_, str> = or.map_mut(|x| &mut x[1..5]);
@@ -1777,6 +1830,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn map_chained_inference() {
             let or = BoxRefMut::new(Box::new(example().1))
                 .map_mut(|x| &mut x[..5])
@@ -1785,6 +1839,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map_mut() {
             let or: BoxRefMut<String> = Box::new(example().1).into();
             let or: Result<BoxRefMut<_, str>, ()> = or.try_map_mut(|x| Ok(&mut x[1..5]));
@@ -1796,6 +1851,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn as_owner() {
             let or: BoxRefMut<String> = Box::new(example().1).into();
             let or = or.map_mut(|x| &mut x[..5]);
@@ -1804,6 +1860,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn into_owner() {
             let or: BoxRefMut<String> = Box::new(example().1).into();
             let or = or.map_mut(|x| &mut x[..5]);
@@ -1813,6 +1870,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn fmt_debug() {
             let or: BoxRefMut<String> = Box::new(example().1).into();
             let or = or.map_mut(|x| &mut x[..5]);
@@ -1822,6 +1880,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn erased_owner() {
             let o1: BoxRefMut<Example, str> = BoxRefMut::new(Box::new(example()))
                 .map_mut(|x| &mut x.1[..]);
@@ -1834,6 +1893,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn non_static_erased_owner() {
             let mut foo = [413, 612];
             let bar = &mut foo;
@@ -1853,6 +1913,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn raii_locks() {
             use super::super::RefMutRefMut;
             use std::cell::RefCell;
@@ -1892,6 +1953,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn eq() {
             let or1: BoxRefMut<[u8]> = BoxRefMut::new(vec![1, 2, 3].into_boxed_slice());
             let or2: BoxRefMut<[u8]> = BoxRefMut::new(vec![1, 2, 3].into_boxed_slice());
@@ -1899,6 +1961,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn cmp() {
             let or1: BoxRefMut<[u8]> = BoxRefMut::new(vec![1, 2, 3].into_boxed_slice());
             let or2: BoxRefMut<[u8]> = BoxRefMut::new(vec![4, 5, 6].into_boxed_slice());
@@ -1906,6 +1969,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn partial_cmp() {
             let or1: BoxRefMut<[u8]> = BoxRefMut::new(vec![4, 5, 6].into_boxed_slice());
             let or2: BoxRefMut<[u8]> = BoxRefMut::new(vec![1, 2, 3].into_boxed_slice());
@@ -1913,6 +1977,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn hash() {
             let mut h1 = DefaultHasher::new();
             let mut h2 = DefaultHasher::new();
@@ -1927,6 +1992,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn borrow() {
             let mut hash = HashMap::new();
             let     key1 = BoxRefMut::<String>::new(Box::new("foo".to_string())).map(|s| &s[..]);
@@ -1940,6 +2006,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn total_erase() {
             let a: OwningRefMut<Vec<u8>, [u8]>
                 = OwningRefMut::new(vec![]).map_mut(|x| &mut x[..]);
@@ -1954,6 +2021,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn total_erase_box() {
             let a: OwningRefMut<Vec<u8>, [u8]>
                 = OwningRefMut::new(vec![]).map_mut(|x| &mut x[..]);
@@ -1968,6 +2036,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map1() {
             use std::any::Any;
 
@@ -1978,6 +2047,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map2() {
             use std::any::Any;
 
@@ -1988,6 +2058,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map3() {
             use std::any::Any;
 
@@ -1998,6 +2069,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn try_map4() {
             use std::any::Any;
 
@@ -2008,6 +2080,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn into_owning_ref() {
             use super::super::BoxRef;
 
@@ -2024,6 +2097,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(not(feature = "no_std"))]
         fn ref_mut() {
             use std::cell::RefCell;
 
